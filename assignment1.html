@@ -12,13 +12,40 @@
     <body> 
 
         <div class="header">
-            <h1>Example Student's Assignment 1!</h1>
+            <h1>Assignment 1: Blink!</h1>
+            
+            <h2> The Schematics </h2>
             <p>
-            <img src="red-panda.jpg" width=400></a>
+            <img src="Schematic.jpg" width=400></a>
             </p>
             <p>
-            Here is all the documentation for assignment 1!
+            I displayed 4 lEDs (white, yellow, red, and blue), each tied to their own arduino pin. For the red and yellow pins, I used a 220 ohm resistor, and for the white and blue LEDs I used a 100 ohm resistor. Heres the math:
             </p>
+            <h3>Red and Yellow LEDs</h3>
+            <p> Voltage from arduino: 5 volts. LED voltage drop: 1.8 volts. Max current: 30 mA</p>
+            <p>V=IR</p>
+            <p>5-1.8 = .03 * R </p>
+            <p>R = 3.2/0.03 = 106.66 minimum resistor</p>
+            <p>Therefore, the 220 ohm resistor is best!</p>
+            <h3>White and Blue LEDs</h3>
+            <p> Voltage from arduino: 5 volts. LED voltage drop: 3.3 volts. Max current: 30 mA</p>
+            <p>V=IR</p>
+            <p>5-3.3 = .03 * R </p>
+            <p>R = 1.7/0.03 = 56.66 minimum resistor</p>
+            <p>Therefore, the 100 ohm resistor is best!</p>
+    
+            <h2>The Wiring </h2>
+            <p> <img src="Schematic.jpg" width=400></a> </p>
+            <p>Each color of wire is related to the color LED. The oragne wire at the end connects to ground. </p>
+
+            <h2>The Code </h2>
+            <p> <img src="A0Code" width=400></a> </p>
+           
+            <h3>The Gif</h3>
+            <p> <img src="GIF.gif" width=400></a> </p>
+            <p>The lights go in order: blue, red, yellow, white. At first they go slowly, one second at a time, but each new cycle they get faster, untill it's too fast and they slow down again. The gif processors I found couldn't quite capture the entire process, which took about 30 second, so here is a smaller sample.</p>
+            
+    
         </div>
         
     </body>
