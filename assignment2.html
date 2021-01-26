@@ -39,88 +39,71 @@
 
             <h2>The Code </h2>
 <pre>
-// constants that won't change. They're used here to set pin numbers:
-const int buttonPin = 2;    // the number of the pushbutton pin
-const int ledPin = 9;      // the number of the LED pin
+// constants that won't change. They're used here to set pin numbers and how many actions the LED will take:
+const int buttonPin = 2;    // which port the pushbutton pin is
+const int ledPin = 9;      // which port the LED pin is
 const int actionMax = 3;     // how many actions the LED will take
+unsigned long debounceDelay = 50;    // the debounce time, to make sure the button actually changed, instead of a mistake
 
 // Variables that will change:
-int ledAction = 0;             // the current action the LED will be taking
-int buttonState;             // the current reading from the input pin
-int lastButtonState = LOW;   // the previous reading from the input pin
-
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
+int ledAction = 0;             // tells which action the LED is taking
+int buttonState;             // the latest reading of the button
+int lastButtonState = LOW;   // the previous reading of the button, starts out off
+unsigned long lastDebounceTime = 0;  // the last time the button changed
 
 void setup() {
-  pinMode(buttonPin, INPUT);
-  pinMode(ledPin, OUTPUT);
-
-  // set initial LED state to off
-  digitalWrite(ledPin, LOW);
+  pinMode(buttonPin, INPUT); //sets the button pin to read inputs
+  pinMode(ledPin, OUTPUT);  //sets the ledPin to be an output
+  digitalWrite(ledPin, LOW); //start out with the LED off
 }
 
 void loop() {
-  // read the state of the switch into a local variable:
-  int reading = digitalRead(buttonPin);
+  int reading = digitalRead(buttonPin); //read the state of the button pin
 
-  // check to see if you just pressed the button
-  // (i.e. the input went from LOW to HIGH), and you've waited long enough
-  // since the last press to ignore any noise:
-
-  // If the switch changed, due to noise or pressing:
-  if (reading != lastButtonState) {
-    // reset the debouncing timer
-    lastDebounceTime = millis();
+  if (reading != lastButtonState) {     //If the reading is different from the last button state
+    lastDebounceTime = millis();        // restart the debouncing timer
   }
 
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
-
-    // if the button state has changed:
-    if (reading != buttonState) {
-      buttonState = reading;
-
-      // only change the LED action if the new button state is HIGH
-      if (buttonState == HIGH) {
-        ledAction +=1;
+  if ((millis() - lastDebounceTime) > debounceDelay) {      // if the reading lasts longer than the debounce delay
+    if (reading != buttonState) {                           // and if the reading is different than the established button state
+      buttonState = reading;                                // then update the button state.
+      if (buttonState == HIGH) {                            // furthermore, if the button state is HIGH,
+        ledAction +=1;                                      // then move on to the next LED action
       }
     }
   }
 
-  //check that the ledAction isn't higher than allowed. if it is, put it back to 0
-  if (ledAction > actionMax) {
-    ledAction = 0;
+  if (ledAction > actionMax) {     // If the LED action is outside of it's possible range
+    ledAction = 0;                 // then reset to 0
   }
 
   // The various actions the LED takes
-  if (ledAction == 0) {            //LED is off
+  if (ledAction == 0) {            // 0 means LED is off
     digitalWrite(ledPin, LOW);
-  } else if (ledAction == 1) {    //LED is on
+  } else if (ledAction == 1) {    // 1 means LED is on
     digitalWrite(ledPin, HIGH);
-  } else if (ledAction == 2) {    //LED is dim
+  } else if (ledAction == 2) {    // 2 means LED is dim
     analogWrite(ledPin, 100);
-  } else if (ledAction == 3) {     // LED fades in and out
+  } else if (ledAction == 3) {     // 3 means LED fades in and out
     int check = 0;                 //initialize check, a variable used to exit the forloop if the button is pressed
-    // fade in from min to max in increments of 5 points, as long as the button hasn't been pressed:
-    for (int fadeValue = 0 ; fadeValue <= 255 && check == 0; fadeValue += 5) {
-      analogWrite(ledPin, fadeValue);     // sets the value (range from 0 to 255):
+    
+    for (int fadeValue = 0 ; fadeValue <= 255 && check == 0; fadeValue += 5) { //fade from off to full on, as long as the button hasn't been pressed
+      analogWrite(ledPin, fadeValue);     // sets the LED brightness (range from 0 to 255):
       check = digitalRead(buttonPin);     // check if the button has been pressed
-      delay(30);                          // wait for 30 milliseconds to see the dimming effect
+      delay(30);                          // wait for 30 milliseconds, so the dimming happens at a rate we can see
     }
-    check = max(check, digitalRead(buttonPin));     // check if the button has been pressed
-    // fade out from max to min in increments of 5 points, as long as the button hasn't been pressed:
-    for (int fadeValue = 255 ; fadeValue >= 0 && check ==0; fadeValue -= 5) {
-      analogWrite(ledPin, fadeValue);               // sets the value (range from 0 to 255):
+        
+    check = max(check, digitalRead(buttonPin));     // check if the button has been pressed (now or in the last forloop)
+   
+    for (int fadeValue = 255 ; fadeValue >= 0 && check ==0; fadeValue -= 5) { //fade out from full on to off, as long as the button hasn't been pressed
+      analogWrite(ledPin, fadeValue);               // sets the LED brightness (range from 0 to 255):
       check = max(check, digitalRead(buttonPin));   //Check to see if the buttons been pressed
-      delay(30);                                    // wait for 30 milliseconds to see the dimming effect
+      delay(30);                                    // wait for 30 milliseconds so the dimming happens at a rate we can see
     }  
   }
-  // save the reading. Next time through the loop, it'll be the lastButtonState:
-  lastButtonState = reading;
+  
+  
+  lastButtonState = reading; //After everything, save the reading to last Button State to prep for the next round
 }
 </pre>
            
