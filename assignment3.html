@@ -1,0 +1,115 @@
+<!DOCTYPE html> 
+<html> 
+    <head> 
+        <meta charset="utf-8"> 
+        <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+        <title>Sophia's HCDE 439 Physical Computing Page!</title> 
+
+        <link href="style.css" media="screen" rel="stylesheet" type="text/css" />
+
+    </head> 
+    <body> 
+
+        <div class="header">
+            <h1>Assignment 3: Input Output!</h1>
+            <p> An LED is blue when the thermal sensor is cold, and red when the thermal sensor is warmed up.</p>
+            <p> Code used: </p> 
+            <p> <a href="http://www.arduino.cc/en/Tutorial/Debounce">Debounce</a> by Davit A. Mellis (2006), last modified by Arturo Guadalupi (2016) </p> 
+      
+            <p><a href="http://www.arduino.cc/en/Tutorial/Fading">Fading</a> by David A. Mellis (2008), last modified by Tom Igoe (2011) </p> 
+
+            
+            <h2> The Schematics </h2>
+            <p>
+            <img src="A3_schematic.jpg" width=400></a>
+            </p>
+            <p>
+            I have a thermal sensor connected to a 100 ohm resistor and being read by the A0 pin. The multicolor LED has its red and blue LEDs connected to a 220 ohm resistor and 100 resistor, respectively.
+            <p> Voltage from arduino: 5 volts. LED voltage drop: 1.8 volts. Max current: 30 mA</p>
+            <p>V=IR</p>
+            <p>5-1.8 = .03 * R </p>
+            <p>R = 3.2/0.03 = 106.66 minimum resistor</p>
+            <p>Therefore, the 220 ohm resistor is best!</p>
+            <p>I like using the maximum current (30 mA) in my calculations, so I know without a doubt that any larger resistor is safe.</p
+    
+            <h2>The Wiring </h2>
+            <p> <img src="A3_breadboard.jpg" width=400></a> </p>
+            <p>For the thermal sensor, red connects to power, black to ground, and white is for reading values. For the light, the red wire connects to the red LED, and the blue wire connects to the blue LED, with black to ground.</p>
+
+            <h2>The Code </h2>
+<pre>
+// constants that won't change. They're used here to set pin numbers and how many actions the LED will take:
+const int buttonPin = 2;    // which port the pushbutton pin is
+const int ledPin = 9;      // which port the LED pin is
+const int actionMax = 3;     // how many actions the LED will take
+unsigned long debounceDelay = 50;    // the debounce time, to make sure the button actually changed, instead of a mistake
+
+// Variables that will change:
+int ledAction = 0;             // tells which action the LED is taking
+int buttonState;             // the latest reading of the button
+int lastButtonState = LOW;   // the previous reading of the button, starts out off
+unsigned long lastDebounceTime = 0;  // the last time the button changed
+
+void setup() {
+  pinMode(buttonPin, INPUT); //sets the button pin to read inputs
+  pinMode(ledPin, OUTPUT);  //sets the ledPin to be an output
+  digitalWrite(ledPin, LOW); //start out with the LED off
+}
+
+void loop() {
+  int reading = digitalRead(buttonPin); //read the state of the button pin
+
+  if (reading != lastButtonState) {     //If the reading is different from the last button state
+    lastDebounceTime = millis();        // restart the debouncing timer
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {      // if the reading lasts longer than the debounce delay
+    if (reading != buttonState) {                           // and if the reading is different than the established button state
+      buttonState = reading;                                // then update the button state.
+      if (buttonState == HIGH) {                            // furthermore, if the button state is HIGH,
+        ledAction +=1;                                      // then move on to the next LED action
+      }
+    }
+  }
+
+  if (ledAction > actionMax) {     // If the LED action is outside of it's possible range
+    ledAction = 0;                 // then reset to 0
+  }
+
+  // The various actions the LED takes
+  if (ledAction == 0) {            // 0 means LED is off
+    digitalWrite(ledPin, LOW);
+  } else if (ledAction == 1) {    // 1 means LED is on
+    digitalWrite(ledPin, HIGH);
+  } else if (ledAction == 2) {    // 2 means LED is dim
+    analogWrite(ledPin, 100);
+  } else if (ledAction == 3) {     // 3 means LED fades in and out
+    int check = 0;                 //initialize check, a variable used to exit the forloop if the button is pressed
+    
+    for (int fadeValue = 0 ; fadeValue <= 255 && check == 0; fadeValue += 5) { //fade from off to full on, as long as the button hasn't been pressed
+      analogWrite(ledPin, fadeValue);     // sets the LED brightness (range from 0 to 255):
+      check = digitalRead(buttonPin);     // check if the button has been pressed
+      delay(30);                          // wait for 30 milliseconds, so the dimming happens at a rate we can see
+    }
+        
+    check = max(check, digitalRead(buttonPin));     // check if the button has been pressed (now or in the last forloop)
+   
+    for (int fadeValue = 255 ; fadeValue >= 0 && check ==0; fadeValue -= 5) { //fade out from full on to off, as long as the button hasn't been pressed
+      analogWrite(ledPin, fadeValue);               // sets the LED brightness (range from 0 to 255):
+      check = max(check, digitalRead(buttonPin));   //Check to see if the buttons been pressed
+      delay(30);                                    // wait for 30 milliseconds so the dimming happens at a rate we can see
+    }  
+  }
+  
+  
+  lastButtonState = reading; //After everything, save the reading to last Button State to prep for the next round
+}
+</pre>
+           
+            <h3>The Gif</h3>
+            <p> <img src="A3_gif.gif" width=400></a> </p>
+            <p>the thermal sensor reads just room temperature and the LED is blue. Then, when I touch the thermal sensor, it heats up, and the LED transitions to red.</p>
+        </div>
+    </body>
+</html>
