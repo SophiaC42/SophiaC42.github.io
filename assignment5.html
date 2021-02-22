@@ -14,7 +14,7 @@
         <div class="header">
             <h1>Assignment 5: High(er) voltage and Transistors!</h1>
             <p> </p> 
-            <p>Kenny really helped me out problem shooting my wiring. I had put flipped the photoresistor and the 100K resistor, so I was getting unexpected lighting. I also used the arduino example code <a href="ttp://www.arduino.cc/en/Tutorial/Smoothing">Smoothing</a> to help reduce the flickering of the lights.</p>
+            <p>Kenny really helped me out problem shooting my wiring. I had put flipped the photoresistor and the 100K resistor, so I was getting unexpected lighting. I also used the arduino example code <a href="http://www.arduino.cc/en/Tutorial/Smoothing">Smoothing</a> to help reduce the flickering of the lights.</p>
             
             <h3>The Gif</h3>
             <p> <img src="A5_gif.gif" width=400></a> </p>
@@ -57,7 +57,7 @@
     
             <h2>The Wiring </h2>
             <p> <img src="A5_breadboard.jpg" width=400></a>  <img src="A5_breadboardClose.jpg" width=400></a></p>
-            <p> Here's the breadboard! Red wires connect to power and black connects to ground. The blue wire is the photoresistor input. The yellow wire connects to the transistor gate. The orange wire connects ti the ground side of the LED strip. </p>
+            <p> Here's the breadboard! Red wires connect to power and black connects to ground. The blue wire is the photoresistor input. The yellow wire connects to the transistor gate. The orange wire connects to the ground side of the LED strip. </p>
        
 
             <h2>The Code </h2>
@@ -82,7 +82,8 @@ int average = 0;            // average of the readings
 
 
 void setup() {
-  Serial.begin(9600);
+  //Serial.begin(9600);   //I've been using serial print as a way to check when I get weird values. 
+                          //I don't need it right now, but it's good to have available
   pinMode(gate, INPUT);   // sets up gate pin to be an input
   for (int thisReading = 0; thisReading < numReadings; thisReading++) { //for numreadings
     readings[thisReading] = 0;                                          //set that index in readings[] to be 0
@@ -107,11 +108,10 @@ void loop() {
   
   average = total / numReadings;  // find the average reading
   analogWrite(gate, average);     // brighten the LEDs accordingly    
-  Serial.println(average)      
+  //Serial.println(average)         //check point to make sure the numbers are reasonable, not needed now
   
   delay(1);        // delay in between reads for stability
 }
-
 
 </pre>
            
