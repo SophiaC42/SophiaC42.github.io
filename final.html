@@ -46,8 +46,122 @@
           <p>  </p>
 
 
-          <h2>The Arduino Code </h2>
+          <h2>The Code </h2>
 <pre>
+/*
+ *  Code about the IR sensor is based off of code by
+ *  Armin Joachimeyer, 2020-2021
+ *  armin.joachimsmeyer@gmail.com
+ *  https://github.com/z3t0/Arduino-IRremote.
+ *
+ */
+
+#define DECODE_NEC          //Include decoding abilities for IR
+#include <IRremote.h>       //Include the IR library
+
+const int IR_RECEIVE_PIN = 11;    // Pin that recieves the IR info
+const int sensor = A4;      // pin that reads photoresistor
+const int gate = 9;         // pin that's the gate to the transistor
+
+int setting = 0;            //What setting the LED is on (on, off, compensate)
+int sensorValue = 0;        // raw photoresistor data
+int output;                 // calculated LED brightness based on one photoresistor reading
+int off = 900;              // any brighter than this and the LEDs are off
+int on =500;                // any darker than this and the LEDS are fully on
+const int numReadings = 30; // how many readings are averaged at a time (for smoothing)            
+int readings[numReadings];  // holds all the readings to be averaged  (for smoothing)
+int readIndex = 0;          // current index of readings (for smoothing)
+int total = 0;              // total of all the readings to be averaged (for smoothing)  
+int average = 0;            // average of the readings
+
+
+
+
+void setup() {
+    Serial.begin(115200);                                  //Be able to read the IR
+    IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK); // start up the reciever
+    
+    pinMode(gate, INPUT);   // sets up gate pin to be an input
+    
+    for (int thisReading = 0; thisReading < numReadings; thisReading++) { //for numreadings
+      readings[thisReading] = 0;                                          //set that index in readings[] to be 0
+    }
+}
+
+
+void loop() {
+    if (IrReceiver.decode()) {      // If the infared senses anything
+      decodeReciever();             // decode the reciever, and potentially change the setting variable accordingly
+    }    
+
+    switch(setting){                    // the options of the LED setting are: 
+      case 0:                           // if setting is 0,
+        analogWrite(gate, 0);           // turn off LED strip
+        break;
+      case 1:                           // if setting is 1,
+        analogWrite(gate, 255);         // Turn the LED strip fully on
+        break;
+      case 2:                           // if setting is 2,
+        readSensor();                   // check the photoresistor (and do some smoothing math)
+        analogWrite(gate, average);     // and then turn on the LED strip accordingly
+        break;     
+    }
+}
+
+/*
+ * function that reads the photoresistor, 
+ * converts that to how the LED strip should be on
+ * and smooths the data to avoid flickering
+ */
+void readSensor() {   
+  sensorValue = analogRead(sensor);             // read the photoresistor  
+  output = map(sensorValue, on, off, 0, 255);   // map into the analogWrite() range where dark is 0 and bright is 255
+  output = constrain(output, 0, 255);           // constrain the values to the analogWrite() range
+  output = 255 - output;                        // inverse output, because we want to compensate the light, not reflect the light
+  //Serial.println(output);
+
+  // This chunk of code is from the example Smoothing by David A. Mellis
+  // http://www.arduino.cc/en/Tutorial/Smoothing
+  total = total - readings[readIndex];    // remove the oldest reading from the total
+  readings[readIndex] = output;           // replace the oldest reading with the new reading
+  total = total + readings[readIndex];    // add the newest reading to the total
+  readIndex = readIndex + 1;              // move indext to the next oldest reading
+  if (readIndex >= numReadings) {         // if you're at the end of the list,
+    readIndex = 0;                        // go back to the beginning
+  }
+  average = total / numReadings;          // find the average reading      
+  
+  delay(1);     // delay in between reads for stability
+}
+
+
+/*
+ * Decodes the IR info
+ * This section is especially from Armin Joachimeyer (linked above)
+*/
+void decodeReciever(){
+  IrReceiver.printIRResultShort(&Serial);                   // print some info about the incoming signal
+  if (IrReceiver.decodedIRData.protocol == UNKNOWN) {       // if the info thats gathered is unfamiliar
+      IrReceiver.printIRResultRawFormatted(&Serial, true);  // print more info for debugging
+  }
+  Serial.println();             // print a line
+  IrReceiver.resume();          // and let the IR reciever resume checking for signals
+
+  /*
+   * Checks the data recieved, and if it's data I've specified, changes settings accordingly
+   */
+  switch (IrReceiver.decodedIRData.command) {
+    case 0x16:      //if you press 0
+      setting = 0;  // setting changes to 0
+       break;
+    case 0x0C:      //if you press 
+      setting = 1;  //setting changes to one
+       break;
+    case 0x18:      //if you press 2
+      setting = 2;  setting changes to 2
+       break;
+  }          
+}
 </pre>    
         </div>
     </body>
