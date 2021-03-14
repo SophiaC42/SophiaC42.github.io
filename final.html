@@ -24,17 +24,25 @@
           </p> 
               
           <h1>Final: Light Up My Room</h1>
+            <p>For my project I wanted to make lights for my room. I often don't notice when the room gets dim until I'm squinting at my work. So, I want lights that take measure the light of the room, and compensate to give extra light. So, as my room gets dimmer as night sets in, my lights slowly turn themselves on.</p>
           <p> <img src="final_photo.jpg" width=800></a> </p>
 
-          <h2>The Video</h2>
+          <h2>The Gif</h2>
+          <p>With an infrared remote, I press 1 to turn it fully on. I then press 2, so that while my big light is on, it turns off, and when I turn my room light off, the LED strip turns itself on. I press 0 to turn it fully off. </p>
             <p> <img src="final_gif.gif" width=800></a> </p>  
-          <p></p>
+          
           <p></p>
           
       <h2>Setting it up</h2>
       <p> <img src="final_plan.jpg" width=800></a> </p>
+<p>Here is my innitial sketch. I planned to pin up the LED strip somehow, and have the sensors and wiring by the window, where it can easily reach power. </p>
+
       <p> <img src="final_sample_materials.png" width=800></a> </p>
+<p>Since LED light is very harsh, I needed some sort of material to diffuse the light. I tried different papers, and fabrics, and settled on some plain white, loose weaved cotton. Here's a few of my alternative options: </p>
+
+
       <p> <img src="final_setup.png" width=800></a> </p>
+<p>Here's the physical set up of my device. I cut a hole in a box, to stick the IR recievor and the photoresistor out of. I also cut holes for the the wire to the LED strip to exit, as well as for the cord to the power. </p>
           <p>
             
           </p>
@@ -42,7 +50,36 @@
 
           <h2>The Schematic</h2>
           <img src="final_schematic.jpg" width=800></a>
+          <p>I needed 3 parts to my set up: the LED strip, the photoresistor, and the IR recievor. My LED strip needs the 12 volts from power, and to manage the power and current, there needs to be a transistor. The photoresistor and IR recievor both just need 5 volts. the photoresistor is connected to a resistor of 100 k ohms.</p>
           <p></p>
+
+        <h2>The Math</h2>
+             <p>Let's start with the photoresistor, and what resistor to use as V2. When I looked up the range for the photoresistor, I found that darkness creates a resistance of 200k ohms, and bright light creates a resistance of 10k ohms. I want a wide range of sensing, since my project is about sensing whether it's daytime or night time. So I want the difference between the two extreems to be as lorge as possible, like: </p>
+             <p></p>
+             <p>change = V1/(V1 + 10) - V1/(V1 + 200)</p>
+             <p>if I set V1 to 200 or 10, thats an okay range: </p>
+             <p>change = 200/(200+ 10) = 200/(200+200) </p>
+             <p>change = 20/21 - 1/2 = 9.5/21</p>
+             <p></p>
+             <p>change = 10/(10+ 10) = 10/(10+200) </p>
+             <p>change = 1/2 - 1/21 = 9.5/21</p>
+             <p></p>
+             <p>if I set V1 to a number between, that gets the largest range: </p>
+             <p>change = 100/(100+ 10) = 100/(100+200) </p>
+             <p>change = 10/11 - 1/3 = 19/33</p>
+             <p></p>
+             <p></p>
+             <p>Now let's talk about the LED strip and voltage. I measured Vin, and while it should be 12v, I found mine to be 11.4v. The LED strip is a 100 prong parallel circut. Within each prong is 3 white LEDs and 1 180 ohm resistor. Each white LED has a voltage drop of 11.36. The current in 1 prong is:</p>
+             <p>V = IR</p>
+             <p>11.4 - 3(3.3) = I * 180</p>
+             <p>1.5 = I * 180</p>
+             <p>I = 0.00833 amperes</p>
+             <p>I = 8.33 mA</p>
+             <p></p>
+             <p>Within a parallel circut, summation is the cumulation of each prong. with 100 prongs:</p>
+             <p>0.0083 * 100 = .833 amperes</p>
+             <p>So the total curent I am using is .833 amperes. Since the transistor has a maximum drain current of 32 amperes, I'm well within the range. </p>
+<p></p>
 
           <h2>The Wiring </h2>
           <p> <img src="final_wiring.png" width=800></a></p>
@@ -50,9 +87,11 @@
 
 
           <h2>The Code </h2>
+Here a few snippets and explanations, with larger scale explanations. Below is the full code, with more granual explanations.
         <p> <img src="final_loop.png" width=800></a> </p>
         <p> <img src="final_IR.png" width=800></a> </p>
         <p> <img src="final_photoresistor.png" width=800></a> </p>
+<h3>The Full Code</h3>
 <pre>
 /*
  *  Code about the IR sensor is based off of code by
